@@ -1,0 +1,50 @@
+var mapFun= function(){emit(this.roll,this.age)}
+
+var reduceFun = function(key,values){
+return Array.sum(values)
+}
+
+var avgFun = function(key,values){
+return Array.avg(values)
+}
+
+
+db.student.mapReduce(mapFun,avgFun,{'out':'outputavg'})
+
+db.output.find().pretty()
+
+db.outputavg.find().pretty()
+
+db.student.insert({roll:101,age:25})
+
+db.student.insert({roll:102,age:30})
+
+db.student.insert({roll:101,age:35})
+
+db.student.insert({roll:101,age:40})
+
+db.student.insert({roll:104,age:45})
+
+
+ var reduce_min = function(key,values){
+		var min = values[0];
+		values.foreach(function(val){
+			if(val < min) min = val;
+		})
+		return min;
+	};
+
+var reduce_max = function(key,values){
+var max = values[0];
+values.forEach(function(val){
+if(val > max) max = val;
+})
+return max;
+}
+
+
+var mapAge = function(){emit('age',this.age);}
+
+var min = db.student.mapReduce(mapAge,reduce_min,{'out':'outmin'}).results[0].value;
+
+var max= db.student.mapReduce(mapAge,reduce_max,{'out':'outmin'}).results[0].value;
